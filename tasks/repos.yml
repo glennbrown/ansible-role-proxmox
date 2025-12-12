@@ -24,15 +24,21 @@
   notify: update_apt_cache
 
 - name: Switch ceph to no-subscription repo
-  ansible.builtin.deb822_repository:
-    enabled: true
-    name: ceph
-    types: deb
-    uris: 'http://download.proxmox.com/debian/ceph-squid'
-    suites: "{{ ansible_distribution_release }}"
-    components:
-      - no-subscription
-    signed_by: /usr/share/keyrings/proxmox-archive-keyring.gpg
+  ansible.builtin.copy:
+    content: |
+      Types: deb
+      URIs: https://enterprise.proxmox.com/debian/ceph-squid
+      Suites: trixie
+      Components: enterprise
+      Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
+      Enabled: false
+
+      Types: deb
+      URIs: http://download.proxmox.com/debian/ceph-squid
+      Suites: trixie
+      Components: no-subscription
+      Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
+    dest: /etc/apt/sources.list.d/ceph.sources
   notify: update_apt_cache
 
 - name: Force update apt cache
