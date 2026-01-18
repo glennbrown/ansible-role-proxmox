@@ -3,16 +3,21 @@ proxmox_kernel_modules: []
 proxmox_packages:
   - apt-file
   - aptitude 
+  - btrfs-progs
   - btop
+  - cifs-utils
   - command-not-found
   - cpufetch
+  - e2fsprogs
   - fwupd
+  - jfsutils
   - htop
   - intel-microcode
   - inxi
   - jq
   - lm-sensors
   - mc
+  - nfs-common
   - nvme-cli
   - smartmontools
   - python3-apt
@@ -20,3 +25,5 @@ proxmox_packages:
   - sudo
   - tmux
   - vim
+  - xfsprogs
+    
