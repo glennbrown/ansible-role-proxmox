@@ -37,4 +37,4 @@
   notify: update_apt_cache
 
 - name: Force update apt cache
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
