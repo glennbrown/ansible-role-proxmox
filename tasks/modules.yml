@@ -5,4 +5,4 @@
     state: "{{ item.state | default('present')}}"
     persistent: "{{ item.state | default('present')}}"
   loop: "{{ proxmox_kernel_modules }}"
-  when: proxmox_kernel_modules is defined
+  when: proxmox_kernel_modules is defined and proxmox_kernel_modules | length > 0

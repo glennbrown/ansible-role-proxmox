@@ -1,4 +1,12 @@
 ---
+- name: Update /etc/issue
+  ansible.builtin.copy:
+    src: issue
+    dest: /etc/issue
+
+- ansible.builtin.import_tasks:
+    file: ssh.yml
+    
 - ansible.builtin.import_tasks:
     file: repos.yml
 
