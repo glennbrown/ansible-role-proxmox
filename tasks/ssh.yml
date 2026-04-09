@@ -4,4 +4,3 @@
     user: root
     state: present
     key: "{{ ssh_publickey_root }}"
-    path: /etc/pve/priv/authorized_keys
