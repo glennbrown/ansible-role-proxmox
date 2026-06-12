@@ -1,15 +1,21 @@
 ---
+role_name_check: 1
 dependency:
-  enabled: false
+  name: galaxy
+  options:
+    ignore-errors: true
 driver:
   name: docker
 platforms:
   - name: instance
-    image: geerlingguy/docker-debian12-ansible:latest
+    image: geerlingguy/docker-debian13-ansible:latest
     pre_build_image: true
     privileged: true
-    command: "/bin/bash -c 'sleep infinity'"
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
 provisioner:
   name: ansible
-verifier:
-  name: ansible
+  playbooks:
+    converge: ${MOLECULE_PLAYBOOK:-converge.yml}
