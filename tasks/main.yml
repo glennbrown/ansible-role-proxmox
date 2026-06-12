@@ -2,3 +2,8 @@
 - name: Update Proxmox VE repositories
   ansible.builtin.include_tasks:
     file: repos.yml
+
+- name: Remove subscription nag
+  ansible.builtin.include_tasks:
+    file: nag.yml
+  when: proxmox_remove_subscription_nag

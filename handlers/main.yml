@@ -3,3 +3,8 @@
   ansible.builtin.apt:
     update_cache: true
   listen: update_apt_cache
+
+- name: Run subscription nag removal script
+  ansible.builtin.command:
+    cmd: /usr/local/bin/pve-remove-nag.sh
+  listen: run_nag_removal
