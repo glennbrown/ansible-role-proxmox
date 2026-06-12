@@ -8,3 +8,5 @@
   ansible.builtin.command:
     cmd: /usr/local/bin/pve-remove-nag.sh
   listen: run_nag_removal
+  register: nag_result
+  changed_when: nag_result.stdout | length > 0
