@@ -1,41 +1,66 @@
 ---
-name: Molecule Test
+name: CI
 
 on:
   push:
+    branches:
+      - master
   pull_request:
+  schedule:
+    - cron: "0 11 * * 0"
+
+defaults:
+  run:
+    working-directory: "glennbrown.proxmox"
 
 jobs:
-  molecule:
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repository
+      - name: Check out the codebase.
         uses: actions/checkout@v4
+        with:
+          path: "glennbrown.docker"
 
-      - name: Set up Python
+      - name: Set up Python 3.
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.13" # Can't go to 3.14+ until Ansible 13.x
 
-      - name: Cache pip dependencies
-        uses: actions/cache@v4
+      - name: Install test dependencies.
+        run: pip3 install yamllint
+
+      - name: Lint code.
+        run: |
+          yamllint .
+
+  molecule:
+    name: Molecule
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        distro:
+          - debian13
+          - debian12
+
+    steps:
+      - name: Check out the codebase.
+        uses: actions/checkout@v4
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          path: glennbrown.proxmox
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Set up Python 3.
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13" # Can't go to 3.14+ until Ansible 13.x
 
-      - name: Run ansible-lint
-        run: ansible-lint
-        env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
+      - name: Install test dependencies.
+        run: pip3 install ansible molecule molecule-plugins[docker] docker
 
       - name: Run Molecule tests
         run: molecule test
         env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
+          PY_COLORS: "1"
+          ANSIBLE_FORCE_COLOR: "1"
+          MOLECULE_DISTRO: ${{ matrix.distro }}
