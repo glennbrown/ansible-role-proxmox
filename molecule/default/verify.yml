@@ -1,0 +1,86 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    # --- Repository configuration ---
+
+    - name: Check pve-enterprise repo is disabled
+      ansible.builtin.command:
+        cmd: grep -q "Enabled: false" /etc/apt/sources.list.d/pve-enterprise.sources
+      changed_when: false
+
+    - name: Stat proxmox no-subscription sources file
+      ansible.builtin.stat:
+        path: /etc/apt/sources.list.d/proxmox.sources
+      register: proxmox_sources
+
+    - name: Assert proxmox no-subscription sources file exists
+      ansible.builtin.assert:
+        that: proxmox_sources.stat.exists
+        fail_msg: proxmox.sources was not created
+
+    - name: Check proxmox sources contains pve-no-subscription component
+      ansible.builtin.command:
+        cmd: grep -q "pve-no-subscription" /etc/apt/sources.list.d/proxmox.sources
+      changed_when: false
+
+    - name: Stat ceph sources file
+      ansible.builtin.stat:
+        path: /etc/apt/sources.list.d/ceph.sources
+      register: ceph_sources
+
+    - name: Assert ceph sources file exists
+      ansible.builtin.assert:
+        that: ceph_sources.stat.exists
+        fail_msg: ceph.sources was not created
+
+    - name: Check ceph sources has no-subscription entry
+      ansible.builtin.command:
+        cmd: grep -q "no-subscription" /etc/apt/sources.list.d/ceph.sources
+      changed_when: false
+
+    - name: Check ceph enterprise entry is disabled
+      ansible.builtin.command:
+        cmd: grep -q "Enabled: false" /etc/apt/sources.list.d/ceph.sources
+      changed_when: false
+
+    # --- Nag removal ---
+
+    - name: Stat nag removal script
+      ansible.builtin.stat:
+        path: /usr/local/bin/pve-remove-nag.sh
+      register: nag_script
+
+    - name: Assert nag script exists and is executable
+      ansible.builtin.assert:
+        that:
+          - nag_script.stat.exists
+          - nag_script.stat.mode == "0755"
+        fail_msg: "pve-remove-nag.sh missing or not executable"
+
+    - name: Stat APT post-invoke hook
+      ansible.builtin.stat:
+        path: /etc/apt/apt.conf.d/no-nag-script
+      register: apt_hook
+
+    - name: Assert APT hook exists
+      ansible.builtin.assert:
+        that: apt_hook.stat.exists
+        fail_msg: no-nag-script APT hook was not created
+
+    - name: Check APT hook references the nag script
+      ansible.builtin.command:
+        cmd: grep -q "pve-remove-nag.sh" /etc/apt/apt.conf.d/no-nag-script
+      changed_when: false
+
+    - name: Check web UI JS has been patched
+      ansible.builtin.command:
+        cmd: grep -q "NoMoreNagging" /usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js
+      changed_when: false
+
+    - name: Check mobile UI template has been patched
+      ansible.builtin.command:
+        cmd: grep -qF "<!-- MANAGED BLOCK FOR MOBILE NAG -->" /usr/share/pve-yew-mobile-gui/index.html.tpl
+      changed_when: false

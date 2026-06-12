@@ -8,19 +8,29 @@ This is an Ansible role (`ansible-role-proxmox`) that configures Proxmox VE repo
 
 ## Running and Testing
 
-Lint with ansible-lint:
+Lint:
 
 ```bash
 ansible-lint
 ```
 
-Run against a host (requires inventory):
+Molecule tests (requires Docker):
+
+```bash
+pip install -r requirements.txt
+molecule test          # full cycle: create, prepare, converge, verify, idempotency, destroy
+molecule converge      # apply the role only
+molecule verify        # run assertions only
+molecule destroy       # tear down container
+```
+
+`prepare.yml` stubs the Proxmox-specific files and downloads the real Proxmox GPG keyring so `apt update` runs cleanly inside the Debian Bookworm container.
+
+Run against a real host (requires inventory):
 
 ```bash
 ansible-playbook -i <inventory> <playbook>.yml
 ```
-
-Test a specific task file by including it in a playbook that targets a Proxmox host.
 
 ## Structure
 
