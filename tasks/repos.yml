@@ -38,5 +38,18 @@
     mode: '0644'
   notify: update_apt_cache
 
+- name: Manage PVE test repository
+  ansible.builtin.copy:
+    content: |
+      Types: deb
+      URIs: http://download.proxmox.com/debian/pve
+      Suites: {{ ansible_facts.distribution_release }}
+      Components: pvetest
+      Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
+      Enabled: {{ proxmox_enable_pvetest_repo | lower }}
+    dest: /etc/apt/sources.list.d/pve-test.sources
+    mode: '0644'
+  notify: update_apt_cache
+
 - name: Force update apt cache
   ansible.builtin.meta: flush_handlers

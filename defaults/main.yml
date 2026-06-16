@@ -1,2 +1,4 @@
 ---
 proxmox_remove_subscription_nag: true
+proxmox_enable_pvetest_repo: false
+proxmox_disable_ha_services: false

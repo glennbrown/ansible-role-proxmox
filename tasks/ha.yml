@@ -1,0 +1,10 @@
+---
+- name: Disable HA cluster services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+  loop:
+    - pve-ha-lrm
+    - pve-ha-crm
+    - corosync

@@ -7,3 +7,8 @@
   ansible.builtin.include_tasks:
     file: nag.yml
   when: proxmox_remove_subscription_nag
+
+- name: Disable HA services
+  ansible.builtin.include_tasks:
+    file: ha.yml
+  when: proxmox_disable_ha_services
