@@ -1,13 +1,13 @@
 ---
-- name: Disable Proxmox enterprise repository
+- name: Disable PVE enterprise repository
   ansible.builtin.lineinfile:
     path: /etc/apt/sources.list.d/pve-enterprise.sources
     regexp: '^Enabled:\s+true'
-    line: 'Enabled: false'
+    line: "Enabled: false"
     state: present
   notify: update_apt_cache
 
-- name: Enable Proxmox no-subscription repository
+- name: Enable PVE no-subscription repository
   ansible.builtin.copy:
     content: |
       Types: deb
@@ -16,7 +16,7 @@
       Components: pve-no-subscription
       Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
     dest: /etc/apt/sources.list.d/proxmox.sources
-    mode: '0644'
+    mode: "0644"
   notify: update_apt_cache
 
 - name: Switch ceph to no-subscription repository
@@ -35,10 +35,17 @@
       Components: no-subscription
       Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
     dest: /etc/apt/sources.list.d/ceph.sources
-    mode: '0644'
+    mode: "0644"
   notify: update_apt_cache
 
-- name: Manage PVE test repository
+- name: Remove PVE test repository
+  ansible.builtin.file:
+    src: /etc/apt/sources.list.d/pve-test.sources
+    state: absent
+  notify: update_apt_cache
+  when: not proxmox_enable_pvetest_repo
+
+- name: Enable PVE test repository
   ansible.builtin.copy:
     content: |
       Types: deb
@@ -48,8 +55,9 @@
       Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
       Enabled: {{ proxmox_enable_pvetest_repo | lower }}
     dest: /etc/apt/sources.list.d/pve-test.sources
-    mode: '0644'
+    mode: "0644"
   notify: update_apt_cache
+  when: proxmox_enable_pvetest_repo
 
 - name: Force update apt cache
   ansible.builtin.meta: flush_handlers

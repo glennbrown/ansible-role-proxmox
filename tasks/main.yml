@@ -1,5 +1,5 @@
 ---
-- name: Update Proxmox VE repositories
+- name: Update PVE repositories
   ansible.builtin.include_tasks:
     file: repos.yml
 
