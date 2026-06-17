@@ -40,7 +40,7 @@
 
 - name: Remove PVE test repository
   ansible.builtin.file:
-    src: /etc/apt/sources.list.d/pve-test.sources
+    path: /etc/apt/sources.list.d/pve-test.sources
     state: absent
   notify: update_apt_cache
   when: not proxmox_enable_pvetest_repo
