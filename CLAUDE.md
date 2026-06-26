@@ -14,24 +14,6 @@ Lint:
 ansible-lint
 ```
 
-Molecule tests (requires Docker):
-
-```bash
-pip install -r requirements.txt
-molecule test          # full cycle: create, prepare, converge, verify, idempotency, destroy
-molecule converge      # apply the role only
-molecule verify        # run assertions only
-molecule destroy       # tear down container
-```
-
-`prepare.yml` stubs the Proxmox-specific files and downloads the real Proxmox GPG keyring so `apt update` runs cleanly inside the Debian Bookworm container.
-
-Run against a real host (requires inventory):
-
-```bash
-ansible-playbook -i <inventory> <playbook>.yml
-```
-
 ## Structure
 
 - `tasks/main.yml` — entry point; delegates to `repos.yml` and conditionally `nag.yml`
