@@ -30,10 +30,8 @@ An Ansible role that performs post-install configuration for Proxmox VE. It swit
 
 When `proxmox_remove_subscription_nag` is `true` (the default):
 
-- Deploys `/usr/local/bin/pve-remove-nag.sh`, which patches `/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js` to bypass the subscription check in the web UI, and appends a JavaScript block to `/usr/share/pve-yew-mobile-gui/index.html.tpl` to suppress the nag in the mobile UI. Both patches are idempotent.
-- Installs `/etc/apt/apt.conf.d/no-nag-script`, a DPkg post-invoke hook that re-runs the patch script automatically after any package update that might overwrite the widget toolkit.
-
-After the role runs, clear your browser cache or do a hard reload (Ctrl+Shift+R) for the web UI change to take effect.
+- Queries the GitHub API for the latest release of [pve-fake-subscription](https://github.com/Jamesits/pve-fake-subscription) and installs it as a `.deb` package. The package makes Proxmox's local subscription check report a valid subscription, so the nag popup never appears. Installation is skipped if the package is already at the latest version.
+- Any legacy nag removal script (`/usr/local/bin/pve-remove-nag.sh`) and its associated APT hook (`/etc/apt/apt.conf.d/no-nag-script`) are removed if present.
 
 ### HA service management
 

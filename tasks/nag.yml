@@ -1,18 +1,38 @@
 ---
-- name: Deploy subscription nag removal script
-  ansible.builtin.copy:
-    src: pve-remove-nag.sh
-    dest: /usr/local/bin/pve-remove-nag.sh
-    owner: root
-    group: root
-    mode: '0755'
-  notify: run_nag_removal
+- name: Remove legacy nag removal script
+  ansible.builtin.file:
+    path: /usr/local/bin/pve-remove-nag.sh
+    state: absent
 
-- name: Deploy subscription nag APT hook
-  ansible.builtin.copy:
-    content: |
-      DPkg::Post-Invoke { "/usr/local/bin/pve-remove-nag.sh"; };
-    dest: /etc/apt/apt.conf.d/no-nag-script
-    owner: root
-    group: root
-    mode: '0644'
+- name: Remove legacy nag APT hook
+  ansible.builtin.file:
+    path: /etc/apt/apt.conf.d/no-nag-script
+    state: absent
+
+- name: Get latest pve-fake-subscription release info
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/Jamesits/pve-fake-subscription/releases/latest
+    return_content: true
+    headers:
+      Accept: application/vnd.github+json
+  register: pve_fake_sub_release
+
+- name: Set pve-fake-subscription facts
+  ansible.builtin.set_fact:
+    pve_fake_sub_deb_url: >-
+      {{ pve_fake_sub_release.json.assets
+         | selectattr('name', 'match', '.*\.deb$')
+         | map(attribute='browser_download_url')
+         | first }}
+    pve_fake_sub_version: "{{ pve_fake_sub_release.json.tag_name | regex_replace('^v', '') }}"
+
+- name: Gather installed package facts
+  ansible.builtin.package_facts:
+    manager: apt
+
+- name: Install pve-fake-subscription
+  ansible.builtin.apt:
+    deb: "{{ pve_fake_sub_deb_url }}"
+  when: >-
+    'pve-fake-subscription' not in ansible_facts.packages or
+    ansible_facts.packages['pve-fake-subscription'][0].version != pve_fake_sub_version
